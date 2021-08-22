@@ -1,4 +1,5 @@
 import typing as t
+
 import json
 
 from uuid import uuid4
@@ -32,20 +33,65 @@ class JSONField(TextField):
             return value
 
 
+
 class BaseModel(Model):
     identifier = CharField(max_length=36, null=False, unique=True, default=uuid4)
 
 
 
 class Intent(BaseModel):
-    requests: t.Container['Request']
-    responses: t.Container['Response']
+    priority = SmallIntegerField(null=False, default=3, choices=(
+        (1, "Very low"),
+        (2, "Low"),
+        (3, "Normal"),
+        (4, "High"),
+        (5, "Very high"),
+    ))
+
+    def to_json(self, simple: bool=False):
+        json = {
+            "identifier": self.identifier,
+            "priority": self.priority,
+        }
+
+        if not simple:
+            if self.requests:
+                json["requests"] = [request.to_json() for request in self.requests]
+
+            if self.responses:
+                json["responses"] = [response.to_json() for response in self.responses]
+
+
+        return json
+
+
+    requests: t.Iterator['Request']
+    responses: t.Iterator['Response']
 
 
 
 class Request(BaseModel):
     text = TextField() # type: str | TextField
-    intent = ForeignKeyField(Intent, backref="requests") # type: Intent | ForeignKeyField
+    intent = ForeignKeyField(Intent, backref="requests", null=True) # type: Intent | ForeignKeyField
+    priority = SmallIntegerField(null=False, default=3, choices=(
+        (1, "Very low"),
+        (2, "Low"),
+        (3, "Normal"),
+        (4, "High"),
+        (5, "Very high"),
+    ))
+
+
+    def to_json(self):
+        json = {
+            "identifier": self.identifier,
+            "text": self.text,
+            "priority": self.priority,
+            "intent": self.intent.to_json(True)
+        }
+
+        return json
+
 
 
 class RequestIndex(FTSModel):
@@ -60,7 +106,26 @@ class RequestIndex(FTSModel):
 
 class Response(BaseModel):
     text = TextField() # type: str | TextField
-    intent = ForeignKeyField(Intent, backref="responses") # type: Intent | ForeignKeyField
+    intent = ForeignKeyField(Intent, backref="responses", null=True) # type: Intent | ForeignKeyField
+    priority = SmallIntegerField(null=False, default=3, choices=(
+        (1, "Very low"),
+        (2, "Low"),
+        (3, "Normal"),
+        (4, "High"),
+        (5, "Very high"),
+    ))
+
+
+    def to_json(self):
+        json = {
+            "identifier": self.identifier,
+            "text": self.text,
+            "priority": self.priority,
+            "intent": self.intent.to_json(True)
+        }
+
+        return json
+
 
 
 class ResponseIndex(FTSModel):
