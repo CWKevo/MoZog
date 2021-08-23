@@ -93,6 +93,13 @@ class Request(BaseModel):
         return json
 
 
+    def save(self, **kwargs):
+        RequestIndex.rebuild()
+        RequestIndex.optimize()
+
+        return super().save(**kwargs)
+
+
 
 class RequestIndex(FTSModel):
     rowid = RowIDField()
@@ -125,6 +132,13 @@ class Response(BaseModel):
         }
 
         return json
+
+
+    def save(self, **kwargs):
+        ResponseIndex.rebuild()
+        ResponseIndex.optimize()
+
+        return super().save(**kwargs)
 
 
 

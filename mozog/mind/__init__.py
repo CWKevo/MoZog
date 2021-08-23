@@ -8,6 +8,7 @@ from mozog.datasets.database import initialize_database
 class Mozog:
     def __init__(self, database_path: str) -> None:
         self.database = initialize_database(database_path)
+        self.database.connect()
 
         self.all_models = (
             Intent,
@@ -47,11 +48,10 @@ class Mozog:
         if request is not None:
             return (x.intent for x in Request.select().join(RequestIndex, on=(Request.id == RequestIndex.rowid)).where(RequestIndex.match(request)).order_by(Request.priority) if x.intent is not None)
 
-        elif response is not None:
+        if response is not None:
             return (x.intent for x in Response.select().join(ResponseIndex, on=(Response.id == ResponseIndex.rowid)).where(ResponseIndex.match(response)).order_by(Response.priority) if x.intent is not None)
 
-        else:
-            raise TypeError("You must specify either `request` or `response`.")
+        raise TypeError("You must specify either `request` or `response`.")
 
 
 

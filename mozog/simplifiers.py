@@ -18,6 +18,6 @@ def remove_stop_words(string: str, stop_words: t.Container[str]=DEFAULT_STOP_WOR
 
 
 if __name__ == "__main__":
-    test_string = remove_stop_words(remove_punctuation("I have a giant, thicc, house with an object, so the house is happy..."))
+    test_string = remove_stop_words(remove_punctuation("I have a giant, thicc, house with an object, so the house is joyful..."))
 
     print(test_string)
